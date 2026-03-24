@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense Control Pro</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#121a2b;
+      --panel2:#182235;
+      --line:rgba(255,255,255,.08);
+      --text:#eef4ff;
+      --muted:#9fb0cf;
+      --green:#22c55e;
+      --blue:#3b82f6;
+      --red:#ef4444;
+      --yellow:#f59e0b;
+      --radius:18px;
+      --shadow:0 12px 28px rgba(0,0,0,.25);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, Arial, sans-serif;
+      background:linear-gradient(180deg,#0a1020 0%, #101827 100%);
+      color:var(--text);
+    }
+
+    .app{
+      max-width:1200px;
+      margin:0 auto;
+      padding:18px;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(12px);
+      background:rgba(11,18,32,.78);
+      border-bottom:1px solid var(--line);
+      margin:-18px -18px 18px;
+      padding:16px 18px;
+    }
+
+    .topbar-inner{
+      max-width:1200px;
+      margin:0 auto;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .title-wrap h1{
+      margin:0;
+      font-size:1.35rem;
+    }
+
+    .title-wrap p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .badge{
+      border:1px solid rgba(34,197,94,.3);
+      color:#8ef0b0;
+      background:rgba(34,197,94,.12);
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:.82rem;
+      white-space:nowrap;
+    }
+
+    .grid{
+      display:grid;
+      gap:14px;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:14px;
+      margin-bottom:16px;
+    }
+
+    .card{
+      background:rgba(18,26,43,.96);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .section{
+      padding:16px;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
+
+    .stat{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .stat span{
+      color:var(--muted);
+      font-size:.82rem;
+      display:block;
+      margin-bottom:8px;
+    }
+
+    .stat strong{
+      font-size:1.25rem;
+    }
+
+    .quick-panel{
+      display:grid;
+      gap:12px;
+      align-content:start;
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .tab{
+      border:none;
+      cursor:pointer;
+      padding:11px 14px;
+      border-radius:12px;
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      font-weight:700;
+    }
+
+    .tab.active{
+      background:rgba(59,130,246,.18);
+      outline:1px solid rgba(59,130,246,.35);
+    }
+
+    .panel{display:none}
+    .panel.active{display:block}
+
+    .fields{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
+
+    .fields-2{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+    }
+
+    .fields-3{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+
+    label{
+      display:block;
+      color:var(--muted);
+      font-size:.85rem;
+      margin-bottom:6px;
+    }
+
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      padding:12px 12px;
+      border-radius:14px;
+      font-size:.95rem;
+      outline:none;
+    }
+
+    textarea{
+      resize:vertical;
+      min-height:90px;
+    }
+
+    button{
+      border:none;
+      cursor:pointer;
+      border-radius:14px;
+      padding:12px 14px;
+      color:white;
+      font-weight:700;
+    }
+
+    .btn-primary{background:linear-gradient(135deg,var(--green),#16a34a)}
+    .btn-secondary{background:linear-gradient(135deg,var(--blue),#2563eb)}
+    .btn-danger{background:linear-gradient(135deg,var(--red),#dc2626)}
+    .btn-soft{
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+    }
+
+    .btn-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .expense-list{
+      display:grid;
+      gap:10px;
+    }
+
+    .expense-item{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      border-radius:16px;
+      padding:14px;
+      display:grid;
+      gap:10px;
+    }
+
+    .expense-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .expense-title{
+      font-weight:800;
+      font-size:1rem;
+    }
+
+    .expense-meta{
+      color:var(--muted);
+      font-size:.88rem;
+      margin-top:5px;
+      line-height:1.45;
+    }
+
+    .expense-amount{
+      font-size:1.14rem;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .chip{
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      font-size:.8rem;
+    }
+
+    .empty{
+      text-align:center;
+      padding:28px 16px;
+      border:1px dashed var(--line);
+      border-radius:16px;
+      color:var(--muted);
+    }
+
+    .report-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:14px;
+    }
+
+    .bars{
+      display:grid;
+      gap:10px;
+    }
+
+    .bar-row{
+      display:grid;
+      gap:6px;
+    }
+
+    .bar-head{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:.9rem;
+    }
+
+    .bar-track{
+      height:12px;
+      background:rgba(255,255,255,.06);
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .bar-fill{
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,var(--blue),var(--green));
+    }
+
+    .month-row{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      margin-bottom:10px;
+    }
+
+    .muted{color:var(--muted)}
+
+    .footer-note{
+      margin-top:16px;
+      text-align:center;
+      color:var(--muted);
+      font-size:.82rem;
+    }
+
+    dialog{
+      width:min(760px, calc(100vw - 24px));
+      border:none;
+      padding:0;
+      background:#0f172a;
+      color:var(--text);
+      border-radius:22px;
+      overflow:hidden;
+    }
+
+    dialog::backdrop{
+      background:rgba(0,0,0,.6);
+    }
+
+    .modal-head{
+      padding:16px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+    }
+
+    .modal-body{
+      padding:16px;
+    }
+
+    .fab{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      width:60px;
+      height:60px;
+      border-radius:999px;
+      font-size:1.7rem;
+      background:linear-gradient(135deg,var(--green),#16a34a);
+      box-shadow:0 16px 28px rgba(34,197,94,.28);
+      z-index:30;
+    }
+
+    @media (max-width: 980px){
+      .hero{grid-template-columns:1fr}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .fields{grid-template-columns:repeat(2,1fr)}
+      .fields-3{grid-template-columns:1fr}
+      .report-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width: 640px){
+      .stats{grid-template-columns:1fr}
+      .fields, .fields-2{grid-template-columns:1fr}
+      .expense-top{flex-direction:column}
+      .expense-amount{white-space:normal}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="title-wrap">
+        <h1>Expense Control Pro</h1>
+        <p>Gestione spese professionale per azienda e famiglia, in un unico pannello.</p>
+      </div>
+      <div class="badge" id="currentMonthBadge">Mese corrente</div>
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="hero">
+      <div class="card section">
+        <h2 style="margin:0 0 10px;">Panoramica</h2>
+        <div class="stats">
+          <div class="stat">
+            <span>Totale mese</span>
+            <strong id="statMonth">€ 0,00</strong>
+          </div>
+          <div class="stat">
+            <span>Totale oggi</span>
+            <strong id="statToday">€ 0,00</strong>
+          </div>
+          <div class="stat">
+            <span>Spese da rimborsare</span>
+            <strong id="statPending">€ 0,00</strong>
+          </div>
+          <div class="stat">
+            <span>Numero spese</span>
+            <strong id="statCount">0</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section quick-panel">
+        <div>
+          <div class="muted" style="margin-bottom:6px;">Categoria top</div>
+          <strong id="topCategory" style="font-size:1.2rem;">-</strong>
+        </div>
+        <div>
+          <div class="muted" style="margin-bottom:6px;">Media per spesa</div>
+          <strong id="avgExpense" style="font-size:1.2rem;">€ 0,00</strong>
+        </div>
+        <div>
+          <div class="muted" style="margin-bottom:6px;">Importo più alto</div>
+          <strong id="maxExpense" style="font-size:1.2rem;">€ 0,00</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="spese">Spese</button>
+      <button class="tab" data-tab="report">Report</button>
+      <button class="tab" data-tab="dati">Dati</button>
+    </div>
+
+    <section class="panel active" id="panel-dashboard">
+      <div class="card section">
+        <h3 style="margin-top:0;">Ultime spese</h3>
+        <div id="latestExpenses" class="expense-list"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-spese">
+      <div class="card section" style="margin-bottom:16px;">
+        <h3 style="margin-top:0;">Filtri e ricerca</h3>
+        <div class="fields">
+          <div>
+            <label>Cerca</label>
+            <input id="searchInput" type="text" placeholder="Descrizione, note, fornitore..." />
+          </div>
+          <div>
+            <label>Ambito</label>
+            <select id="filterScope">
+              <option value="all">Tutti</option>
+              <option value="Azienda">Azienda</option>
+              <option value="Famiglia">Famiglia</option>
+            </select>
+          </div>
+          <div>
+            <label>Categoria</label>
+            <select id="filterCategory"></select>
+          </div>
+          <div>
+            <label>Stato rimborso</label>
+            <select id="filterReimbursement">
+              <option value="all">Tutti</option>
+              <option value="pending">Da rimborsare</option>
+              <option value="reimbursed">Rimborsato</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="fields" style="margin-top:12px;">
+          <div>
+            <label>Dal</label>
+            <input id="filterFrom" type="date" />
+          </div>
+          <div>
+            <label>Al</label>
+            <input id="filterTo" type="date" />
+          </div>
+          <div>
+            <label>Ordina per</label>
+            <select id="sortBy">
+              <option value="date_desc">Data più recente</option>
+              <option value="date_asc">Data più vecchia</option>
+              <option value="amount_desc">Importo più alto</option>
+              <option value="amount_asc">Importo più basso</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn-soft" id="clearFiltersBtn" style="width:100%;">Reset filtri</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <h3 style="margin:0;">Elenco spese</h3>
+          <button class="btn-primary" id="openModalBtn">+ Nuova spesa</button>
+        </div>
+        <div id="expenseList" class="expense-list" style="margin-top:14px;"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-report">
+      <div class="card section">
+        <h3 style="margin-top:0;">Report e analisi</h3>
+
+        <div class="fields-3" style="margin-bottom:16px;">
+          <div>
+            <label>Intervallo dal</label>
+            <input type="date" id="reportFrom" />
+          </div>
+          <div>
+            <label>Intervallo al</label>
+            <input type="date" id="reportTo" />
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn-secondary" id="applyReportBtn" style="width:100%;">Applica intervallo</button>
+          </div>
+        </div>
+
+        <div class="stats" style="margin-bottom:16px;">
+          <div class="stat">
+            <span>Totale periodo</span>
+            <strong id="reportTotal">€ 0,00</strong>
+          </div>
+          <div class="stat">
+            <span>Numero voci</span>
+            <strong id="reportCount">0</strong>
+          </div>
+          <div class="stat">
+            <span>Media giornaliera</span>
+            <strong id="reportDailyAvg">€ 0,00</strong>
+          </div>
+          <div class="stat">
+            <span>Rimborsi aperti</span>
+            <strong id="reportPending">€ 0,00</strong>
+          </div>
+        </div>
+
+        <div class="report-grid">
+          <div class="card section" style="padding:14px;">
+            <h4 style="margin-top:0;">Spese per categoria</h4>
+            <div id="categoryBars" class="bars"></div>
+          </div>
+          <div class="card section" style="padding:14px;">
+            <h4 style="margin-top:0;">Riepilogo mensile</h4>
+            <div id="monthlySummary"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-dati">
+      <div class="card section" style="margin-bottom:16px;">
+        <h3 style="margin-top:0;">Backup e esportazione</h3>
+        <div class="btn-row">
+          <button class="btn-secondary" id="exportJsonBtn">Esporta backup JSON</button>
+          <button class="btn-secondary" id="exportCsvBtn">Esporta CSV</button>
+          <button class="btn-soft" id="importJsonBtn">Importa backup JSON</button>
+          <input id="importFile" type="file" accept="application/json" style="display:none;" />
+        </div>
+      </div>
+
+      <div class="card section" style="margin-bottom:16px;">
+        <h3 style="margin-top:0;">Categorie personalizzate</h3>
+        <div class="fields-2">
+          <div>
+            <label>Nuova categoria</label>
+            <input id="newCategoryInput" type="text" placeholder="Es. Assicurazioni" />
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn-primary" id="addCategoryBtn" style="width:100%;">Aggiungi categoria</button>
+          </div>
+        </div>
+        <div id="categoryChips" class="chips" style="margin-top:14px;"></div>
+      </div>
+
+      <div class="card section">
+        <h3 style="margin-top:0;">Area pericolosa</h3>
+        <p class="muted">Cancella tutte le spese salvate su questo dispositivo.</p>
+        <button class="btn-danger" id="deleteAllBtn">Elimina tutti i dati</button>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      I dati vengono salvati nel browser tramite localStorage. Per uso multi-dispositivo servirà poi una versione cloud.
+    </div>
+  </div>
+
+  <button class="fab" id="fabBtn">+</button>
+
+  <dialog id="expenseDialog">
+    <div class="modal-head">
+      <div>
+        <h3 id="dialogTitle" style="margin:0;">Nuova spesa</h3>
+        <div class="muted">Inserisci una spesa completa con tutti i dettagli.</div>
+      </div>
+      <button class="btn-soft" id="closeDialogBtn">Chiudi</button>
+    </div>
+
+    <div class="modal-body">
+      <form id="expenseForm" class="grid">
+        <input type="hidden" id="expenseId" />
+
+        <div class="fields-2">
+          <div>
+            <label>Descrizione</label>
+            <input id="description" required type="text" placeholder="Es. Fornitura ufficio, spesa supermercato..." />
+          </div>
+          <div>
+            <label>Fornitore / negozio</label>
+            <input id="vendor" type="text" placeholder="Es. Amazon, Esselunga, ENI..." />
+          </div>
+        </div>
+
+        <div class="fields">
+          <div>
+            <label>Importo (€)</label>
+            <input id="amount" required type="number" min="0" step="0.01" placeholder="0.00" />
+          </div>
+          <div>
+            <label>Data</label>
+            <input id="date" required type="date" />
+          </div>
+          <div>
+            <label>Ambito</label>
+            <select id="scope">
+              <option>Azienda</option>
+              <option>Famiglia</option>
+            </select>
+          </div>
+          <div>
+            <label>Categoria</label>
+            <select id="category"></select>
+          </div>
+        </div>
+
+        <div class="fields">
+          <div>
+            <label>Metodo pagamento</label>
+            <select id="paymentMethod">
+              <option>Contanti</option>
+              <option>Carta</option>
+              <option>Bonifico</option>
+              <option>PayPal</option>
+              <option>RID / Addebito</option>
+              <option>Altro</option>
+            </select>
+          </div>
+          <div>
+            <label>Conto / carta</label>
+            <input id="accountName" type="text" placeholder="Es. Intesa, Cassa azienda..." />
+          </div>
+          <div>
+            <label>Centro di costo / tag</label>
+            <input id="costCenter" type="text" placeholder="Es. Marketing, Casa, Auto..." />
+          </div>
+          <div>
+            <label>Stato rimborso</label>
+            <select id="reimbursementStatus">
+              <option value="pending">Da rimborsare</option>
+              <option value="reimbursed">Rimborsato</option>
+              <option value="na">Non applicabile</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label>Note</label>
+          <textarea id="notes" placeholder="Dettagli utili, motivo della spesa, riferimento fattura, ecc."></textarea>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" type="submit">Salva spesa</button>
+          <button class="btn-soft" type="button" id="resetFormBtn">Pulisci</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script>
+    const STORAGE_KEY = "expense_control_pro_v1";
+    const DEFAULT_CATEGORIES = [
+      "Ufficio","Trasporti","Carburante","Cibo","Alloggio",
+      "Casa","Salute","Scuola","Bambini","Bollette",
+      "Assicurazioni","Tasse","Abbigliamento","Tempo libero","Altro"
+    ];
+
+    let state = loadState();
+    let reportRange = { from: "", to: "" };
+
+    const el = {
+      tabs: document.querySelectorAll(".tab"),
+      panels: {
+        dashboard: document.getElementById("panel-dashboard"),
+        spese: document.getElementById("panel-spese"),
+        report: document.getElementById("panel-report"),
+        dati: document.getElementById("panel-dati"),
+      },
+
+      currentMonthBadge: document.getElementById("currentMonthBadge"),
+      statMonth: document.getElementById("statMonth"),
+      statToday: document.getElementById("statToday"),
+      statPending: document.getElementById("statPending"),
+      statCount: document.getElementById("statCount"),
+      topCategory: document.getElementById("topCategory"),
+      avgExpense: document.getElementById("avgExpense"),
+      maxExpense: document.getElementById("maxExpense"),
+      latestExpenses: document.getElementById("latestExpenses"),
+
+      searchInput: document.getElementById("searchInput"),
+      filterScope: document.getElementById("filterScope"),
+      filterCategory: document.getElementById("filterCategory"),
+      filterReimbursement: document.getElementById("filterReimbursement"),
+      filterFrom: document.getElementById("filterFrom"),
+      filterTo: document.getElementById("filterTo"),
+      sortBy: document.getElementById("sortBy"),
+      clearFiltersBtn: document.getElementById("clearFiltersBtn"),
+      expenseList: document.getElementById("expenseList"),
+
+      reportFrom: document.getElementById("reportFrom"),
+      reportTo: document.getElementById("reportTo"),
+      applyReportBtn: document.getElementById("applyReportBtn"),
+      reportTotal: document.getElementById("reportTotal"),
+      reportCount: document.getElementById("reportCount"),
+      reportDailyAvg: document.getElementById("reportDailyAvg"),
+      reportPending: document.getElementById("reportPending"),
+      categoryBars: document.getElementById("categoryBars"),
+      monthlySummary: document.getElementById("monthlySummary"),
+
+      exportJsonBtn: document.getElementById("exportJsonBtn"),
+      exportCsvBtn: document.getElementById("exportCsvBtn"),
+      importJsonBtn: document.getElementById("importJsonBtn"),
+      importFile: document.getElementById("importFile"),
+      newCategoryInput: document.getElementById("newCategoryInput"),
+      addCategoryBtn: document.getElementById("addCategoryBtn"),
+      categoryChips: document.getElementById("categoryChips"),
+      deleteAllBtn: document.getElementById("deleteAllBtn"),
+
+      fabBtn: document.getElementById("fabBtn"),
+      expenseDialog: document.getElementById("expenseDialog"),
+      closeDialogBtn: document.getElementById("closeDialogBtn"),
+      dialogTitle: document.getElementById("dialogTitle"),
+      expenseForm: document.getElementById("expenseForm"),
+      expenseId: document.getElementById("expenseId"),
+      description: document.getElementById("description"),
+      vendor: document.getElementById("vendor"),
+      amount: document.getElementById("amount"),
+      date: document.getElementById("date"),
+      scope: document.getElementById("scope"),
+      category: document.getElementById("category"),
+      paymentMethod: document.getElementById("paymentMethod"),
+      accountName: document.getElementById("accountName"),
+      costCenter: document.getElementById("costCenter"),
+      reimbursementStatus: document.getElementById("reimbursementStatus"),
+      notes: document.getElementById("notes"),
+      resetFormBtn: document.getElementById("resetFormBtn"),
+    };
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { expenses: [], categories: [...DEFAULT_CATEGORIES] };
+      try {
+        const parsed = JSON.parse(raw);
+        return {
+          expenses: Array.isArray(parsed.expenses) ? parsed.expenses : [],
+          categories: Array.isArray(parsed.categories) && parsed.categories.length
+            ? parsed.categories
+            : [...DEFAULT_CATEGORIES]
+        };
+      } catch {
+        return { expenses: [], categories: [...DEFAULT_CATEGORIES] };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function todayISO() {
+      return new Date().toISOString().slice(0,10);
+    }
+
+    function euro(value) {
+      return new Intl.NumberFormat("it-IT", {
+        style: "currency",
+        currency: "EUR"
+      }).format(Number(value || 0));
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "-";
+      const d = new Date(dateStr + "T00:00:00");
+      return d.toLocaleDateString("it-IT", { day:"2-digit", month:"2-digit", year:"numeric" });
+    }
+
+    function monthKey(dateStr) {
+      return dateStr ? dateStr.slice(0,7) : "";
+    }
+
+    function monthLabel(key) {
+      const [y,m] = key.split("-");
+      const d = new Date(Number(y), Number(m)-1, 1);
+      return d.toLocaleDateString("it-IT", { month:"long", year:"numeric" });
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;");
+    }
+
+    function jsSafe(str) {
+      return String(str).replace(/'/g, "\\'");
+    }
+
+    function sum(items) {
+      return items.reduce((acc, item) => acc + Number(item.amount || 0), 0);
+    }
+
+    function openDialog(editId = null) {
+      populateCategorySelects();
+
+      if (editId) {
+        const item = state.expenses.find(x => x.id === editId);
+        if (!item) return;
+        el.dialogTitle.textContent = "Modifica spesa";
+        el.expenseId.value = item.id;
+        el.description.value = item.description || "";
+        el.vendor.value = item.vendor || "";
+        el.amount.value = item.amount;
+        el.date.value = item.date || todayISO();
+        el.scope.value = item.scope || "Azienda";
+        el.category.value = item.category || "Altro";
+        el.paymentMethod.value = item.paymentMethod || "Carta";
+        el.accountName.value = item.accountName || "";
+        el.costCenter.value = item.costCenter || "";
+        el.reimbursementStatus.value = item.reimbursementStatus || "na";
+        el.notes.value = item.notes || "";
+      } else {
+        el.dialogTitle.textContent = "Nuova spesa";
+        el.expenseForm.reset();
+        el.expenseId.value = "";
+        el.date.value = todayISO();
+        el.scope.value = "Azienda";
+        el.reimbursementStatus.value = "pending";
+      }
+
+      el.expenseDialog.showModal();
+    }
+
+    function closeDialog() {
+      el.expenseDialog.close();
+    }
+
+    function populateCategorySelects() {
+      const options = state.categories
+        .map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`)
+        .join("");
+
+      el.category.innerHTML = options;
+      el.filterCategory.innerHTML = `<option value="all">Tutte</option>${options}`;
+
+      renderCategoryChips();
+    }
+
+    function renderCategoryChips() {
+      el.categoryChips.innerHTML = state.categories.map(cat => `
+        <span class="chip">
+          ${escapeHtml(cat)}
+          <button class="btn-soft" style="padding:4px 8px;margin-left:6px;" onclick="removeCategory('${jsSafe(cat)}')">x</button>
+        </span>
+      `).join("");
+    }
+
+    function removeCategory(cat) {
+      const used = state.expenses.some(e => e.category === cat);
+      if (used) {
+        alert("Questa categoria è usata in una o più spese e non può essere eliminata.");
+        return;
+      }
+      state.categories = state.categories.filter(c => c !== cat);
+      saveState();
+      renderAll();
+    }
+    window.removeCategory = removeCategory;
+
+    function addExpense(data) {
+      state.expenses.unshift({
+        id: crypto.randomUUID(),
+        ...data,
+        amount: Number(data.amount),
+        createdAt: Date.now()
+      });
+      saveState();
+      renderAll();
+    }
+
+    function updateExpense(id, data) {
+      state.expenses = state.expenses.map(item =>
+        item.id === id ? { ...item, ...data, amount: Number(data.amount) } : item
+      );
+      saveState();
+      renderAll();
+    }
+
+    function deleteExpense(id) {
+      if (!confirm("Vuoi eliminare questa spesa?")) return;
+      state.expenses = state.expenses.filter(item => item.id !== id);
+      saveState();
+      renderAll();
+    }
+    window.deleteExpense = deleteExpense;
+
+    function editExpense(id) {
+      openDialog(id);
+    }
+    window.editExpense = editExpense;
+
+    function duplicateExpense(id) {
+      const item = state.expenses.find(x => x.id === id);
+      if (!item) return;
+      addExpense({
+        description: item.description,
+        vendor: item.vendor,
+        amount: item.amount,
+        date: todayISO(),
+        scope: item.scope,
+        category: item.category,
+        paymentMethod: item.paymentMethod,
+        accountName: item.accountName,
+        costCenter: item.costCenter,
+        reimbursementStatus: item.reimbursementStatus,
+        notes: item.notes
+      });
+    }
+    window.duplicateExpense = duplicateExpense;
+
+    function toggleReimbursement(id) {
+      state.expenses = state.expenses.map(item => {
+        if (item.id !== id) return item;
+        const next =
+          item.reimbursementStatus === "pending" ? "reimbursed" :
+          item.reimbursementStatus === "reimbursed" ? "na" : "pending";
+        return { ...item, reimbursementStatus: next };
+      });
+      saveState();
+      renderAll();
+    }
+    window.toggleReimbursement = toggleReimbursement;
+
+    function getFilteredExpenses() {
+      const q = el.searchInput.value.trim().toLowerCase();
+      const scope = el.filterScope.value;
+      const category = el.filterCategory.value;
+      const reimb = el.filterReimbursement.value;
+      const from = el.filterFrom.value;
+      const to = el.filterTo.value;
+      const sortBy = el.sortBy.value;
+
+      let items = [...state.expenses].filter(item => {
+        const searchFields = [
+          item.description, item.vendor, item.notes, item.category,
+          item.accountName, item.costCenter, item.scope
+        ].join(" ").toLowerCase();
+
+        const okQ = !q || searchFields.includes(q);
+        const okScope = scope === "all" || item.scope === scope;
+        const okCategory = category === "all" || item.category === category;
+        const okReimb = reimb === "all" || item.reimbursementStatus === reimb;
+        const okFrom = !from || item.date >= from;
+        const okTo = !to || item.date <= to;
+
+        return okQ && okScope && okCategory && okReimb && okFrom && okTo;
+      });
+
+      items.sort((a,b) => {
+        if (sortBy === "date_desc") return b.date.localeCompare(a.date);
+        if (sortBy === "date_asc") return a.date.localeCompare(b.date);
+        if (sortBy === "amount_desc") return b.amount - a.amount;
+        if (sortBy === "amount_asc") return a.amount - b.amount;
+        return 0;
+      });
+
+      return items;
+    }
+
+    function categoryTotals(items) {
+      const map = {};
+      items.forEach(item => {
+        map[item.category] = (map[item.category] || 0) + Number(item.amount || 0);
+      });
+      return Object.entries(map).sort((a,b) => b[1] - a[1]);
+    }
+
+    function renderBars(container, entries) {
+      if (!entries.length) {
+        container.innerHTML = `<div class="empty">Nessun dato disponibile.</div>`;
+        return;
+      }
+
+      const max = Math.max(...entries.map(x => x[1]), 1);
+
+      container.innerHTML = entries.map(([name, value]) => `
+        <div class="bar-row">
+          <div class="bar-head">
+            <span>${escapeHtml(name)}</span>
+            <strong>${euro(value)}</strong>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${(value / max) * 100}%"></div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderDashboard() {
+      const now = new Date();
+      const thisMonth = now.toISOString().slice(0,7);
+      const today = todayISO();
+
+      const monthItems = state.expenses.filter(x => monthKey(x.date) === thisMonth);
+      const todayItems = state.expenses.filter(x => x.date === today);
+      const pendingItems = state.expenses.filter(x => x.reimbursementStatus === "pending");
+
+      el.currentMonthBadge.textContent = now.toLocaleDateString("it-IT", { month:"long", year:"numeric" });
+      el.statMonth.textContent = euro(sum(monthItems));
+      el.statToday.textContent = euro(sum(todayItems));
+      el.statPending.textContent = euro(sum(pendingItems));
+      el.statCount.textContent = String(state.expenses.length);
+
+      const catTotals = categoryTotals(state.expenses);
+      el.topCategory.textContent = catTotals[0] ? catTotals[0][0] : "-";
+      el.avgExpense.textContent = euro(state.expenses.length ? sum(state.expenses) / state.expenses.length : 0);
+      el.maxExpense.textContent = euro(state.expenses.length ? Math.max(...state.expenses.map(x => Number(x.amount || 0))) : 0);
+
+      const latest = [...state.expenses]
+        .sort((a,b) => b.date.localeCompare(a.date))
+        .slice(0,6);
+
+      if (!latest.length) {
+        el.latestExpenses.innerHTML = `<div class="empty">Aggiungi la prima spesa per iniziare.</div>`;
+      } else {
+        el.latestExpenses.innerHTML = latest.map(item => renderExpenseCard(item)).join("");
+      }
+    }
+
+    function renderExpenseCard(item) {
+      const reimbLabel =
+        item.reimbursementStatus === "pending" ? "Da rimborsare" :
+        item.reimbursementStatus === "reimbursed" ? "Rimborsato" :
+        "Non applicabile";
+
+      return `
+        <div class="expense-item">
+          <div class="expense-top">
+            <div>
+              <div class="expense-title">${escapeHtml(item.description)}</div>
+              <div class="expense-meta">
+                ${formatDate(item.date)} · ${escapeHtml(item.vendor || "Nessun fornitore")}<br>
+                ${escapeHtml(item.scope)} · ${escapeHtml(item.category)} · ${escapeHtml(item.paymentMethod)}
+              </div>
+            </div>
+            <div class="expense-amount">${euro(item.amount)}</div>
+          </div>
+
+          <div class="chips">
+            <span class="chip">${escapeHtml(item.scope)}</span>
+            <span class="chip">${escapeHtml(item.category)}</span>
+            <span class="chip">${escapeHtml(item.paymentMethod)}</span>
+            ${item.accountName ? `<span class="chip">${escapeHtml(item.accountName)}</span>` : ""}
+            ${item.costCenter ? `<span class="chip">${escapeHtml(item.costCenter)}</span>` : ""}
+            <span class="chip">${reimbLabel}</span>
+          </div>
+
+          ${item.notes ? `<div class="expense-meta">${escapeHtml(item.notes)}</div>` : ""}
+
+          <div class="btn-row">
+            <button class="btn-soft" onclick="editExpense('${item.id}')">Modifica</button>
+            <button class="btn-soft" onclick="duplicateExpense('${item.id}')">Duplica</button>
+            <button class="btn-soft" onclick="toggleReimbursement('${item.id}')">Cambia rimborso</button>
+            <button class="btn-danger" onclick="deleteExpense('${item.id}')">Elimina</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderExpenseList() {
+      const items = getFilteredExpenses();
+      if (!items.length) {
+        el.expenseList.innerHTML = `<div class="empty">Nessuna spesa trovata con i filtri selezionati.</div>`;
+        return;
+      }
+      el.expenseList.innerHTML = items.map(item => renderExpenseCard(item)).join("");
+    }
+
+    function getReportItems() {
+      return state.expenses.filter(item => {
+        if (reportRange.from && item.date < reportRange.from) return false;
+        if (reportRange.to && item.date > reportRange.to) return false;
+        return true;
+      });
+    }
+
+    function daySpan(from, to) {
+      if (!from || !to) return 0;
+      const a = new Date(from + "T00:00:00");
+      const b = new Date(to + "T00:00:00");
+      return Math.max(1, Math.round((b - a) / 86400000) + 1);
+    }
+
+    function renderReports() {
+      const items = getReportItems();
+      const total = sum(items);
+      const pending = sum(items.filter(x => x.reimbursementStatus === "pending"));
+      const count = items.length;
+      const days = daySpan(reportRange.from, reportRange.to);
+
+      el.reportTotal.textContent = euro(total);
+      el.reportCount.textContent = String(count);
+      el.reportDailyAvg.textContent = euro(days ? total / days : total);
+      el.reportPending.textContent = euro(pending);
+
+      renderBars(el.categoryBars, categoryTotals(items));
+
+      const monthly = {};
+      items.forEach(item => {
+        const key = monthKey(item.date);
+        monthly[key] = (monthly[key] || 0) + Number(item.amount || 0);
+      });
+
+      const entries = Object.entries(monthly).sort((a,b) => b[0].localeCompare(a[0]));
+
+      if (!entries.length) {
+        el.monthlySummary.innerHTML = `<div class="empty">Nessun riepilogo disponibile.</div>`;
+      } else {
+        el.monthlySummary.innerHTML = entries.map(([key, value]) => `
+          <div class="month-row">
+            <div><strong>${monthLabel(key)}</strong></div>
+            <div><strong>${euro(value)}</strong></div>
+          </div>
+        `).join("");
+      }
+    }
+
+    function renderAll() {
+      populateCategorySelects();
+      renderDashboard();
+      renderExpenseList();
+      renderReports();
+    }
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportCSV() {
+      const headers = [
+        "Descrizione","Fornitore","Importo","Data","Ambito","Categoria",
+        "Metodo pagamento","Conto/Carta","Centro costo","Stato rimborso","Note"
+      ];
+
+      const rows = state.expenses.map(e => [
+        e.description, e.vendor || "", e.amount, e.date, e.scope, e.category,
+        e.paymentMethod, e.accountName || "", e.costCenter || "", e.reimbursementStatus, e.notes || ""
+      ]);
+
+      const csv = [headers, ...rows]
+        .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(";"))
+        .join("\n");
+
+      downloadFile("expense-control-pro.csv", csv, "text/csv;charset=utf-8;");
+    }
+
+    el.tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        el.tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        Object.values(el.panels).forEach(p => p.classList.remove("active"));
+        el.panels[tab.dataset.tab].classList.add("active");
+      });
+    });
+
+    el.openModalBtn?.addEventListener("click", () => openDialog());
+    el.fabBtn.addEventListener("click", () => openDialog());
+    el.closeDialogBtn.addEventListener("click", closeDialog);
+
+    el.resetFormBtn.addEventListener("click", () => {
+      el.expenseForm.reset();
+      el.expenseId.value = "";
+      el.date.value = todayISO();
+      el.scope.value = "Azienda";
+      el.reimbursementStatus.value = "pending";
+    });
+
+    el.expenseForm.addEventListener("submit", e => {
+      e.preventDefault();
+
+      const data = {
+        description: el.description.value.trim(),
+        vendor: el.vendor.value.trim(),
+        amount: Number(el.amount.value),
+        date: el.date.value,
+        scope: el.scope.value,
+        category: el.category.value,
+        paymentMethod: el.paymentMethod.value,
+        accountName: el.accountName.value.trim(),
+        costCenter: el.costCenter.value.trim(),
+        reimbursementStatus: el.reimbursementStatus.value,
+        notes: el.notes.value.trim()
+      };
+
+      if (!data.description || !data.amount || !data.date || !data.category) {
+        alert("Compila tutti i campi obbligatori.");
+        return;
+      }
+
+      if (el.expenseId.value) updateExpense(el.expenseId.value, data);
+      else addExpense(data);
+
+      closeDialog();
+    });
+
+    [el.searchInput, el.filterScope, el.filterCategory, el.filterReimbursement, el.filterFrom, el.filterTo, el.sortBy]
+      .forEach(node => {
+        node.addEventListener("input", renderExpenseList);
+        node.addEventListener("change", renderExpenseList);
+      });
+
+    el.clearFiltersBtn.addEventListener("click", () => {
+      el.searchInput.value = "";
+      el.filterScope.value = "all";
+      el.filterCategory.value = "all";
+      el.filterReimbursement.value = "all";
+      el.filterFrom.value = "";
+      el.filterTo.value = "";
+      el.sortBy.value = "date_desc";
+      renderExpenseList();
+    });
+
+    el.applyReportBtn.addEventListener("click", () => {
+      reportRange.from = el.reportFrom.value;
+      reportRange.to = el.reportTo.value;
+      renderReports();
+    });
+
+    el.exportJsonBtn.addEventListener("click", () => {
+      downloadFile("expense-control-backup.json", JSON.stringify(state, null, 2), "application/json");
+    });
+
+    el.exportCsvBtn.addEventListener("click", exportCSV);
+
+    el.importJsonBtn.addEventListener("click", () => {
+      el.importFile.click();
+    });
+
+    el.importFile.addEventListener("change", ev => {
+      const file = ev.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!Array.isArray(parsed.expenses) || !Array.isArray(parsed.categories)) throw new Error();
+          state = parsed;
+          saveState();
+          renderAll();
+          alert("Backup importato con successo.");
+        } catch {
+          alert("File JSON non valido.");
+        }
+      };
+      reader.readAsText(file);
+      ev.target.value = "";
+    });
+
+    el.addCategoryBtn.addEventListener("click", () => {
+      const name = el.newCategoryInput.value.trim();
+      if (!name) return;
+      if (state.categories.includes(name)) {
+        alert("Categoria già presente.");
+        return;
+      }
+      state.categories.push(name);
+      saveState();
+      el.newCategoryInput.value = "";
+      renderAll();
+    });
+
+    el.deleteAllBtn.addEventListener("click", () => {
+      if (!confirm("Sei sicuro di voler eliminare tutti i dati?")) return;
+      state = { expenses: [], categories: [...DEFAULT_CATEGORIES] };
+      saveState();
+      renderAll();
+    });
+
+    el.date.value = todayISO();
+    el.reportFrom.value = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0,10);
+    el.reportTo.value = todayISO();
+    reportRange = { from: el.reportFrom.value, to: el.reportTo.value };
+
+    renderAll();
+  </script>
+</body>
+</html>
+</html>
